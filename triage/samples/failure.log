@@ -1,0 +1,49 @@
+CI Failure Triage Agent captured test output
+Command: npm test
+Exit code: 1
+
+> ci-failure-triage-agent@0.1.0 test
+> vitest run
+
+
+ RUN  v3.2.4 /Users/valerii/Desktop/ci-failure-triage-agent
+
+ ❯ src/reconciliation/reconcile.spec.ts (3 tests | 1 failed) 7ms
+   ✓ reconcilePayments > marks a matched PSP payment as reconciled 1ms
+   × reconcilePayments > marks an unmatched PSP payment as pending_investigation 5ms
+     → expected [ { paymentId: 'pay_002', …(2) } ] to deeply equal [ { paymentId: 'pay_002', …(2) } ]
+   ✓ reconcilePayments > marks an amount mismatch as pending_investigation 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/reconciliation/reconcile.spec.ts > reconcilePayments > marks an unmatched PSP payment as pending_investigation
+AssertionError: expected [ { paymentId: 'pay_002', …(2) } ] to deeply equal [ { paymentId: 'pay_002', …(2) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "paymentId": "pay_002",
+      "reason": "No ledger entry found",
+-     "status": "pending_investigation",
++     "status": "reconciled",
+    },
+  ]
+
+ ❯ src/reconciliation/reconcile.spec.ts:28:56
+     26|     const ledgerEntries: LedgerEntry[] = [];
+     27| 
+     28|     expect(reconcilePayments(payments, ledgerEntries)).toEqual([
+       |                                                        ^
+     29|       {
+     30|         paymentId: "pay_002",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  13:43:56
+   Duration  284ms (transform 21ms, setup 0ms, collect 19ms, tests 7ms, environment 0ms, prepare 45ms)
+

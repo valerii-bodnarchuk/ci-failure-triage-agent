@@ -1,0 +1,51 @@
+name: Codex Triage Demo
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  collect-context:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Collect failure context
+        run: npm run triage:collect
+
+      # Future CI path:
+      # 1. Collect the failure log with npm run triage:collect.
+      # 2. Run Codex Action or npm run triage:exec with an API key configured
+      #    in the runner environment.
+      # 3. Validate the JSON report with npm run triage:validate.
+      # 4. Upload triage/reports/latest.json as an artifact.
+      # 5. Require human approval before applying any patch.
+      # Do not add OpenAI API key usage until this boundary is reviewed.
+
+      - name: Upload failure log
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-log
+          path: triage/samples/failure.log
+
+      # Future artifact:
+      # - name: Upload triage report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: triage-report
+      #     path: triage/reports/latest.json

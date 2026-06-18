@@ -1,0 +1,6 @@
+node_modules/
+.npm-cache/
+.tmp/
+.vitest-cache/
+triage/reports/*.json
+!triage/reports/.gitkeep
