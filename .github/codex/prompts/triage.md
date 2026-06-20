@@ -26,4 +26,7 @@ Identify:
 - risk level
 - whether human approval is required
 - proposed minimal patch summary
-- verification commands
+- verification commands in this order:
+  1. `npm test -- src/reconciliation/reconcile.spec.ts`
+  2. `npm test`
+  3. `npm run typecheck`

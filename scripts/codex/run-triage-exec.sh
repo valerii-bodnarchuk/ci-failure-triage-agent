@@ -14,6 +14,9 @@ cd "${REPO_ROOT}"
 mkdir -p "${REPORT_DIR}"
 trap 'rm -f "${TMP_REPORT}"' EXIT
 
+# A previous report must never be validated as the result of this run.
+rm -f "${TMP_REPORT}" "${REPORT_PATH}"
+
 # This installed Codex CLI supports read-only sandboxing for `codex exec`.
 # It does not accept `--ask-for-approval on-request` on `codex exec`, so this
 # runner relies on read-only sandboxing and an explicit human approval step.
@@ -42,6 +45,11 @@ PROMPT
   --output-schema "${SCHEMA_FILE}" \
   --output-last-message "${TMP_REPORT}" \
   -
+
+if [[ ! -s "${TMP_REPORT}" ]]; then
+  echo "Codex triage completed without producing a report" >&2
+  exit 1
+fi
 
 mv "${TMP_REPORT}" "${REPORT_PATH}"
 trap - EXIT

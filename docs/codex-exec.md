@@ -27,7 +27,7 @@ npm run triage:validate
 Record the human approval boundary:
 
 ```sh
-npm run triage:approval
+npm run triage:approval -- --approved-by valerii
 ```
 
 ## How It Differs From Interactive Codex
@@ -36,11 +36,15 @@ Interactive Codex is useful for exploratory development and back-and-forth debug
 
 In this repo, `codex exec` is configured as a read-only triage worker. It should diagnose the CI failure and produce structured JSON. It should not apply patches.
 
+The runner clears a prior `latest.json` before starting and publishes a report only after the worker returns a non-empty new file. This prevents a failed worker run from being mistaken for a valid previous diagnosis.
+
 ## Why Read-Only First
 
 The first automation step is diagnosis. Keeping triage read-only makes the output auditable and prevents the worker from changing application code while it is still classifying the failure.
 
 Patch application is separated behind human approval so a person can review the root cause, risk level, affected files, and verification plan before any source file is modified.
+
+The approval command validates the report and requires `--approved-by <name>` before it writes an approval record. It does not apply code changes.
 
 ## Future CI Mapping
 

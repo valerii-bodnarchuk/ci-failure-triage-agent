@@ -8,11 +8,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "triage:collect": "tsx scripts/codex/collect-ci-context.ts",
-    "triage:approval": "tsx scripts/codex/record-approval.ts",
+    "triage:collect": "node --import tsx scripts/codex/collect-ci-context.ts",
+    "triage:approval": "node --import tsx scripts/codex/record-approval.ts",
     "triage:exec": "bash scripts/codex/run-triage-exec.sh",
-    "triage:validate": "tsx scripts/codex/validate-triage-report.ts",
-    "codex:guard": "tsx scripts/codex/pre-tool-guard.ts"
+    "triage:validate": "node --import tsx scripts/codex/validate-triage-report.ts",
+    "codex:guard": "node --import tsx scripts/codex/pre-tool-guard.ts"
   },
   "devDependencies": {
     "@types/node": "20.19.21",

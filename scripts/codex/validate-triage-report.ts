@@ -25,6 +25,7 @@ const requiredFields = [
   "proposedPatchSummary",
   "verificationCommands"
 ] as const;
+const allowedFields = new Set<string>(requiredFields);
 
 function fail(message: string): never {
   console.error(`Invalid triage report: ${message}`);
@@ -48,43 +49,54 @@ function assertStringArray(value: unknown, field: string): asserts value is stri
 }
 
 async function run(): Promise<void> {
-  let parsed: TriageReport;
+  let parsed: unknown;
 
   try {
-    parsed = JSON.parse(await readFile(reportPath, "utf8")) as TriageReport;
+    parsed = JSON.parse(await readFile(reportPath, "utf8"));
   } catch (error: unknown) {
     const detail = error instanceof Error ? error.message : String(error);
     fail(`could not read or parse ${reportPath}: ${detail}`);
   }
 
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    fail("report must be a JSON object");
+  }
+
+  const report = parsed as TriageReport;
+  const unexpectedFields = Object.keys(report).filter((field) => !allowedFields.has(field));
+
+  if (unexpectedFields.length > 0) {
+    fail(`contains unsupported field(s): ${unexpectedFields.join(", ")}`);
+  }
+
   for (const field of requiredFields) {
-    if (!(field in parsed)) {
+    if (!(field in report)) {
       fail(`missing required field ${field}`);
     }
   }
 
-  if (!categories.has(String(parsed.category))) {
+  if (!categories.has(String(report.category))) {
     fail(`category must be one of ${Array.from(categories).join(", ")}`);
   }
 
-  assertString(parsed.rootCause, "rootCause");
+  assertString(report.rootCause, "rootCause");
 
-  if (typeof parsed.confidence !== "number" || parsed.confidence < 0 || parsed.confidence > 1) {
+  if (typeof report.confidence !== "number" || report.confidence < 0 || report.confidence > 1) {
     fail("confidence must be a number between 0 and 1");
   }
 
-  assertStringArray(parsed.affectedFiles, "affectedFiles");
+  assertStringArray(report.affectedFiles, "affectedFiles");
 
-  if (!riskLevels.has(String(parsed.riskLevel))) {
+  if (!riskLevels.has(String(report.riskLevel))) {
     fail(`riskLevel must be one of ${Array.from(riskLevels).join(", ")}`);
   }
 
-  if (typeof parsed.requiresHumanApproval !== "boolean") {
+  if (typeof report.requiresHumanApproval !== "boolean") {
     fail("requiresHumanApproval must be a boolean");
   }
 
-  assertString(parsed.proposedPatchSummary, "proposedPatchSummary");
-  assertStringArray(parsed.verificationCommands, "verificationCommands");
+  assertString(report.proposedPatchSummary, "proposedPatchSummary");
+  assertStringArray(report.verificationCommands, "verificationCommands");
 
   console.log(`Valid triage report: ${reportPath}`);
 }

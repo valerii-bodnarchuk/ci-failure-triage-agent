@@ -4,13 +4,13 @@ This is a small TypeScript demo project for a controlled Codex workflow that tri
 
 ## Demo Flow
 
-1. A test fails intentionally.
-2. The failure log is captured in `triage/samples/failure.log`.
-3. Codex runs a read-only triage prompt.
-4. Codex returns a structured JSON report matching `.github/codex/schemas/triage.schema.json`.
-5. A risk and approval boundary is checked before any patch work.
-6. Codex proposes a minimal patch.
-7. Verification commands are run after the patch is approved and applied.
+1. Start from a clean clone and install with `npm ci`.
+2. Run `npm test` and show the intentional failing reconciliation test.
+3. Capture the failure log with `npm run triage:collect`.
+4. Run Codex as a read-only triage worker with `npm run triage:exec`.
+5. Validate the structured JSON report against `.github/codex/schemas/triage.schema.json`.
+6. Record the human approval boundary before any patch work.
+7. Apply a minimal approved patch, then run tests and typecheck.
 
 ## Safety Boundary
 
@@ -24,14 +24,18 @@ This is a small TypeScript demo project for a controlled Codex workflow that tri
 ## Commands
 
 ```sh
-npm install
+npm ci
 npm test
 npm run typecheck
 npm run triage:collect
-npm run triage:approval
+npm run triage:exec
+npm run triage:validate
+npm run triage:approval -- --approved-by valerii
 ```
 
 ## Non-interactive Codex worker
+
+Requires the Codex CLI to be installed and authenticated.
 
 ```sh
 npm run triage:collect
@@ -41,6 +45,10 @@ npm run triage:approval
 ```
 
 `npm run triage:exec` runs `codex exec` as a bounded CI-style triage worker. It produces a JSON report first; patch application remains a separate human-approved step.
+
+The runner fails closed: it removes any prior report before starting and publishes `latest.json` only after Codex returns a non-empty new report.
+
+`npm run triage:approval` validates the report first and requires an explicit operator name. It records approval only; it never applies a patch.
 
 ## Expected First State
 
